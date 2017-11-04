@@ -51,7 +51,8 @@ public class TradeManager {
                     MarketBean marketBean = new MarketBean();
                     JSONObject jsonObject2 = new JSONObject(bittrexData.getMarketSummary(jsonObject1.getString("MarketName")));
                     marketBean.fillMarketObject(jsonObject2.getJSONArray("result").getJSONObject(0));
-                    activeMarkets.add(marketBean);
+                    if(marketBean.getBaseVolume()>70 && marketBean.getLast()>0.00005)
+                       activeMarkets.add(marketBean);
                 }
             }
 
@@ -86,7 +87,7 @@ public class TradeManager {
             }
         }
        // if(numberOfBuys>=9 && increaseNumber>3 && currentPrice>(firstPrice*101)/100 && totalBought>0.5)
-        if(numberOfBuys>=13 && increaseNumber>3 && currentPrice>firstPrice && totalBought>1.0)
+        if(numberOfBuys>=13 && increaseNumber>3 && currentPrice>(firstPrice*101)/100 && totalBought>1.0)
             startTrade(market);
     }
 

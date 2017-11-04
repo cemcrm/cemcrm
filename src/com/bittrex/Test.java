@@ -10,15 +10,28 @@ import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Test {
+public class Test extends Thread {
 	static boolean isActive = true;
 	static List<MarketBean> activeMarkets = new ArrayList<>();
 	public Test() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static void main(String[] args)  throws JSONException{
-		testJsonData();
+	public static void main(String[] args)   throws JSONException{
+		TradeManager tradeManager = new TradeManager();
+		tradeManager.getCoinBalance("BTC");
+
+		if(activeMarkets.isEmpty())
+			activeMarkets = tradeManager.getActiveMarkets();
+
+		int threadNumber = activeMarkets.size()/10+1;
+
+		for(int i=0;i<threadNumber;i++){
+			Test test = new Test();
+			test.setName(String.valueOf(i));
+			test.start();
+		}
+
 	}
 
 	public static void testStringData() {
@@ -42,35 +55,33 @@ public class Test {
 		System.out.println(bittrexData.createSellOrder(Currency.ETH, Currency.BAT, 10, 0.1));
 	}
 
-	public static void testJsonData()  throws JSONException {
+	public  void run()  {
 		// Get Wallet-address and balance of BITCOIN:
+		System.out.println("Running Thread Name: "+ this.currentThread().getName());
 		double balance = 0L;
+		List<MarketBean> activeMarketsSubList = new ArrayList<>();
+		activeMarketsSubList = activeMarkets.subList(Integer.valueOf(this.currentThread().getName())*10, Integer.valueOf(this.currentThread().getName())*10+10);
 		TradeManager tradeManager = new TradeManager();
-		JsonData bittrexData = new JsonData();
-		tradeManager.getCoinBalance("BTC");
-		if(activeMarkets.isEmpty())
-			activeMarkets = tradeManager.getActiveMarkets();
-
 		while (isActive) {
 			try {
 				while (tradeManager.isTradeOngoing) {
 					tradeManager.hodl();
 				}
 
-				for (MarketBean market : activeMarkets) {
+				for (MarketBean market : activeMarketsSubList) {
 					tradeManager.detectPump(market);
 
 					if (tradeManager.isTradeOngoing)
 						break;
 				}
-/*
-			JsonObject bitcoinBalance = bittrexData.getBalance("BTC").getJsonObject("result");
-			String wallet = JSONParser.getStringValue(bitcoinBalance, "CryptoAddress");
-			double balanceValue = JSONParser.getDoubleValue(bitcoinBalance, "Balance");
-			double balancePending = JSONParser.getDoubleValue(bitcoinBalance, "Pending");
-			System.out.println("Wallet:\t\t" + wallet);
-			System.out.println("Balance:\t" + balanceValue);
-			System.out.println("Pending:\t" + balancePending);*/
+	/*
+				JsonObject bitcoinBalance = bittrexData.getBalance("BTC").getJsonObject("result");
+				String wallet = JSONParser.getStringValue(bitcoinBalance, "CryptoAddress");
+				double balanceValue = JSONParser.getDoubleValue(bitcoinBalance, "Balance");
+				double balancePending = JSONParser.getDoubleValue(bitcoinBalance, "Pending");
+				System.out.println("Wallet:\t\t" + wallet);
+				System.out.println("Balance:\t" + balanceValue);
+				System.out.println("Pending:\t" + balancePending);*/
 			}
 			catch (Exception e){
 				e.printStackTrace();
