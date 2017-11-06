@@ -9,8 +9,8 @@ import java.util.Properties;
 
 public class StringData {
 	String version = "v1.1";
-	String key = "02634956b88d4f6188b5728b58832fae";
-	String secret = "46a9e06a716e416b9383839d20d56fe4";
+	String key = "";
+	String secret = "";
 	String bittrexApiUrl = "https://bittrex.com/api/" + version;
 
 	public String getVersion() {
